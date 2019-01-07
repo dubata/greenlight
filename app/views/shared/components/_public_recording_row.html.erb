@@ -15,26 +15,36 @@
 
 <tr>
   <td>
-    <div><%= recording[:name] %></div>
+    <div id="recording-title">
+      <text>
+        <% if recording[:metadata][:name] %>
+          <%= recording[:metadata][:name] %>
+        <% else %>
+          <%= recording[:name] %>
+        <% end %>
+      </text>
+    </div>
     <div class="small text-muted">
       <%= t("recording.recorded_on", date: recording_date(recording[:startTime])) %>
     </div>
   </td>
-  <td>
-    <% p = recording[:playbacks].find do |p| p[:type] == "presentation" end %>
-    <% if p && p.key?(:preview) && recording_thumbnails? %>
-      <% p[:preview][:images][:image].each do |img| %>
-        <%= image_tag(img[:content].strip, class: "thumbnail px-2") %>
+  <% if recording_thumbnails? %>
+    <td>
+      <% p = recording[:playbacks].find do |p| p.key?(:preview) end %>
+      <% if p %>
+        <% p[:preview][:images][:image].each do |img| %>
+          <%= image_tag(img[:content].strip, class: "thumbnail px-2") %>
+        <% end %>
       <% end %>
-    <% end %>
-  </td>
-  <td class="text-left">
+    </td>
+  <% end %>
+  <td id="recording-length" class="text-left">
     <div class="small text-muted text-uppercase">
       <%= t("recording.table.length") %>
     </div>
     <%= recording_length(recording[:playbacks]) %>
   </td>
-  <td class="text-left">
+  <td id="recording-users" class="text-left">
     <div class="small text-muted text-uppercase">
       <%= t("recording.table.users") %>
     </div>
@@ -50,6 +60,7 @@
     </div>
   </td>
   <td>
+    <% p = recording[:playbacks].find do |p| p.key?(:length) end %>
     <% recording[:playbacks].each do |p| %>
       <%= link_to p[:type].capitalize, p[:url], class: "btn btn-sm btn-primary", target: "_blank" %>
     <% end %>

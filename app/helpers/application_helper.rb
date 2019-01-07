@@ -28,7 +28,7 @@ module ApplicationHelper
 
   # Determines which providers can show a login button in the login modal.
   def iconset_providers
-    configured_providers & [:google, :twitter]
+    configured_providers & [:google, :twitter, :microsoft_office365]
   end
 
   # Generates the login URL for a specific provider.
@@ -44,6 +44,15 @@ module ApplicationHelper
   # Determines if the BigBlueButton endpoint is the default.
   def bigbluebutton_endpoint_default?
     Rails.configuration.bigbluebutton_endpoint_default == Rails.configuration.bigbluebutton_endpoint
+  end
+
+  # Returns language selection options
+  def language_options
+    language_opts = [['<<<< ' + t("language_options.default") + ' >>>>', "default"]]
+    Rails.configuration.languages.each do |loc|
+      language_opts.push([t("language_options." + loc), loc])
+    end
+    language_opts.sort
   end
 
   # Parses markdown for rendering.

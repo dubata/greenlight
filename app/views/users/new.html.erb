@@ -21,13 +21,15 @@
           <h4 class="mt-2"><%= t("signup.subtitle") %></h4>
         </div>
         <div class="card-body background">
-          <% unless configured_providers.length.zero? %>
-            <% configured_providers.each do |provider| %>
-              <%= link_to omniauth_login_url(provider), class: "btn btn-pill btn-#{provider} btn-block" do %>
-                <i class="fab fa-<%= provider %>"></i>&ensp;<%= t("signup.with", provider: provider.capitalize) %>
+          <% unless iconset_providers.length.zero? %>
+            <% iconset_providers.each do |provider| %>
+              <%= link_to omniauth_login_url(provider), class: "customBtn-#{provider}" do %>
+                <span class="customBtn-icon">
+                  <img class="customBtn-image"></img>
+                </span>
+                <span class="customBtn-text"><%= t("signup.with", provider: t("provider.#{provider}")) %></span>
               <% end %>
             <% end %>
-
             <div class="or-line my-3">
               <div>
                 <span class="text-uppercase" style="background-color: #F5F7FB;">
@@ -57,11 +59,16 @@
               <%= f.password_field :password_confirmation, class: "form-control #{form_is_invalid?(@user, :password_confirmation)}", placeholder: t("signup.password_confirm") %>
               <div class="invalid-feedback d-block"><%= @user.errors.full_messages_for(:password_confirmation).first %></div>
             </div>
-            <div class="form-inline">
-              <%= f.check_box :accepted_terms, class: "form-control #{form_is_invalid?(@user, :accepted_terms)}", placeholder: t("signup.password_confirm") %>
-              <%= f.label :accepted_terms, t("terms.accept", href: link_to(t("terms.title"), terms_path, target: "_blank", class: "ml-1 text-blue")).html_safe, class: "ml-1" %>
-              <div class="invalid-feedback d-block"><%= @user.errors.full_messages_for(:accepted_terms).first %></div>
-            </div>
+            <% if Rails.configuration.terms %>
+              <div class="form-inline">
+                <label class="custom-switch">
+                  <%= f.check_box :accepted_terms, class: "custom-switch-input form-control #{form_is_invalid?(@user, :accepted_terms)}", placeholder: t("signup.password_confirm") %>
+                  <span class="custom-switch-indicator"></span>
+                </label>
+                <%= f.label :accepted_terms, t("terms.accept", href: link_to(t("terms.title"), terms_path, target: "_blank", class: "ml-1 text-blue")).html_safe, class: "ml-1" %>
+                <div class="invalid-feedback d-block"><%= @user.errors.full_messages_for(:accepted_terms).first %></div>
+              </div>
+            <% end %>
             <div class="card-footer">
               <%= f.submit t("signup.title"), class: "btn btn-primary float-right ml-2" %>
               <%= link_to t("cancel"), root_path, class: "btn btn-secondary float-right ml-2" %>

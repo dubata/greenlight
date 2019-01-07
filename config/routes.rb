@@ -17,6 +17,8 @@
 # with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 
 Rails.application.routes.draw do
+  get 'health_check', to: 'health_check/health_check#index'
+
   # Error routes.
   match '/404', to: 'errors#not_found', via: :all
   match '/422', to: 'errors#unprocessable', via: :all
@@ -29,8 +31,17 @@ Rails.application.routes.draw do
   # Redirect to terms page
   match '/terms', to: 'users#terms', via: [:get, :post]
 
+  # Password reset resources.
+  resources :password_resets, only: [:new, :create, :edit, :update]
+
   # User resources.
   scope '/u' do
+    # Verification Routes
+    scope '/verify' do
+      match '/resend', to: 'users#resend', via: [:get, :post], as: :resend
+      match '/confirm/:user_uid', to: 'users#confirm', via: [:get, :post], as: :confirm
+    end
+
     # Handles login of greenlight provider accounts.
     post '/login', to: 'sessions#create', as: :create_session
 
@@ -53,10 +64,11 @@ Rails.application.routes.draw do
   # Extended room routes.
   scope '/:room_uid' do
     post '/', to: 'rooms#join'
+    patch '/', to: 'rooms#update', as: :update_room
     post '/start', to: 'rooms#start', as: :start_room
     get '/logout', to: 'rooms#logout', as: :logout_room
 
-    # Mange recordings.
+    # Manage recordings
     scope '/:record_id' do
       post '/', to: 'rooms#update_recording', as: :update_recording
       delete '/', to: 'rooms#delete_recording', as: :delete_recording

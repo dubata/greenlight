@@ -21,11 +21,20 @@ module SessionsHelper
   def login(user)
     session[:user_id] = user.id
 
-    # If there are not terms, or the user has accepted them, go to their room.
+    # If there are not terms, or the user has accepted them, check for email verification
     if !Rails.configuration.terms || user.accepted_terms
-      redirect_to user.main_room
+      check_email_verified(user)
     else
       redirect_to terms_path
+    end
+  end
+
+  # If email verification is disabled, or the user has verified, go to their room
+  def check_email_verified(user)
+    if !Rails.configuration.enable_email_verification || user.email_verified
+      redirect_to user.main_room
+    else
+      redirect_to resend_path
     end
   end
 
@@ -57,5 +66,17 @@ module SessionsHelper
     env['omniauth.strategy'].options[:default_callback_url] = Rails.configuration.gl_callback_url
     env['omniauth.strategy'].options[:checksum] = generate_checksum parse_customer_name(env["SERVER_NAME"]),
       gl_redirect_url, Rails.configuration.launcher_secret
+  end
+
+  def google_omniauth_hd(env, hd)
+    hd_opts = hd.split(',')
+    env['omniauth.strategy'].options[:hd] =
+      if hd_opts.empty?
+        nil
+      elsif hd_opts.length == 1
+        hd_opts[0]
+      else
+        hd_opts
+      end
   end
 end

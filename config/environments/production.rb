@@ -51,8 +51,29 @@ Rails.application.configure do
   # Prepend all log lines with the following tags.
   config.log_tags = [:request_id]
 
+  # Don't wrap form components in field_with_error divs
+  ActionView::Base.field_error_proc = proc do |html_tag|
+    html_tag.html_safe
+  end
+
   # Use a different cache store in production.
   # config.cache_store = :mem_cache_store
+
+  # Tell Action Mailer to use smtp server, if configured
+  config.action_mailer.delivery_method = ENV['SMTP_SERVER'].present? ? :smtp : :sendmail
+
+  ActionMailer::Base.smtp_settings = {
+    address: ENV['SMTP_SERVER'],
+    port: ENV["SMTP_PORT"],
+    domain: ENV['SMTP_DOMAIN'],
+    user_name: ENV['SMTP_USERNAME'],
+    password: ENV['SMTP_PASSWORD'],
+    authentication: ENV['SMTP_AUTH'],
+    enable_starttls_auto: ENV['SMTP_STARTTLS_AUTO'],
+  }
+
+  # Don't care if the mailer can't send.
+  config.action_mailer.raise_delivery_errors = true
 
   # Use a real queuing backend for Active Job (and separate queues per environment)
   # config.active_job.queue_adapter     = :resque
@@ -77,7 +98,7 @@ Rails.application.configure do
   # require 'syslog/logger'
   # config.logger = ActiveSupport::TaggedLogging.new(Syslog::Logger.new 'app-name')
 
-  if ENV["RAILS_LOG_TO_STDOUT"].present?
+  if ENV["RAILS_LOG_TO_STDOUT"] == "true"
     logger           = ActiveSupport::Logger.new(STDOUT)
     logger.formatter = config.log_formatter
     config.logger = ActiveSupport::TaggedLogging.new(logger)

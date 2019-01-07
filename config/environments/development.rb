@@ -28,8 +28,26 @@ Rails.application.configure do
     config.cache_store = :null_store
   end
 
-  # Don't care if the mailer can't send.
-  config.action_mailer.raise_delivery_errors = false
+  # Don't wrap form components in field_with_error divs
+  ActionView::Base.field_error_proc = proc do |html_tag|
+    html_tag.html_safe
+  end
+
+  # Tell Action Mailer to use smtp server, if configured
+  config.action_mailer.delivery_method = ENV['SMTP_SERVER'].present? ? :smtp : :sendmail
+
+  ActionMailer::Base.smtp_settings = {
+    address: ENV['SMTP_SERVER'],
+    port: ENV["SMTP_PORT"],
+    domain: ENV['SMTP_DOMAIN'],
+    user_name: ENV['SMTP_USERNAME'],
+    password: ENV['SMTP_PASSWORD'],
+    authentication: ENV['SMTP_AUTH'],
+    enable_starttls_auto: ENV['SMTP_STARTTLS_AUTO'],
+  }
+
+  # Do care if the mailer can't send.
+  config.action_mailer.raise_delivery_errors = true
 
   config.action_mailer.perform_caching = false
 
